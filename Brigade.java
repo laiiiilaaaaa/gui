@@ -1,15 +1,16 @@
 import java.util.ArrayList;
 
 public class Brigade {
-    private final int amountB = Main.amountB;
+    private static int counter = 0;
+    private final int brigadeID;
     private final String name;
     private final Foreman foreman;
-    public ArrayList<Employee> employees = new ArrayList<>();
+    private static ArrayList<Employee> employees = new ArrayList<>();
 
     public Brigade(String name, Foreman foreman) {
         this.name = name;
         this.foreman = foreman;
-        Main.amountB++;
+        brigadeID = ++counter;
     }
 
     public String getName() {
@@ -20,36 +21,27 @@ public class Brigade {
         return this.foreman;
     }
 
-    public int getAmountB() {
-        return this.amountB;
+    public ArrayList<Employee> getEmployees() {
+        return employees;
     }
 
     public void addEmployee(Employee employee) {
-        try {
-            if (employee.getClass() == User.class) {
-                throw new IllegalArgumentException("Cannot add employee to user");
-            }
-            this.employees.add(employee);
-        } catch (IllegalArgumentException e) {
-            e.getStackTrace();
+        if (employee.getClass() == User.class) {
+            throw new IllegalArgumentException("Cannot add employee to user");
         }
+        employees.add(employee);
     }
 
     public void addEmployee(ArrayList<Employee> employees) {
-        try {
-            for (Employee employee : employees) {
-                if (employee.getClass() == User.class) {
-                    throw new IllegalArgumentException("Cannot add employee to user");
-                }
-                this.employees.add(employee);
+        for (Employee employee : employees) {
+            if (employee.getClass() == User.class) {
+                throw new IllegalArgumentException("Cannot add employee to user");
             }
-        } catch (IllegalArgumentException e) {
-            e.getStackTrace();
+            employees.add(employee);
         }
     }
 
     public String toString() {
-        return this.getClass() + "( " + this.getAmountB() + " " + this.getName() + " " + this.getForeman() + " "
-                + this.employees + " )";
+        return this.getClass().getName() + "( " + this.name + " " + this.foreman + " " + employees + " )";
     }
 }

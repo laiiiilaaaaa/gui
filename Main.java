@@ -1,92 +1,66 @@
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.io.*;
 import java.util.HashSet;
 
 public class Main {
-    public static ArrayList<String> occupiedNames = new ArrayList<>();
-
-    public static HashMap<Integer, Job> jobs = new HashMap<>();
-    public static HashMap<Integer, Commission> commissions = new HashMap<>();
-    public static int amountJ = 0;
-    public static int amountC = 0;
-    public static int amountED = 0;
-    public static int amountE = 0;
-    public static int amountB = 0;
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NotUniqueNameException {
         FileWriter writer = new FileWriter("history.txt");
-        EmployeeDepartment employeeDepartment = new EmployeeDepartment("Factory");
-        EmployeeDepartment newEmployeeDepartment = employeeDepartment.createDepartment(employeeDepartment);
-        writer.write(newEmployeeDepartment.toString() + "\n");
-        Specialist specialist = new Specialist("Adam", "Smith",
-                LocalDateTime.of(2012, 12, 12, 2, 15), employeeDepartment,
-                "Engineer");
-        writer.write(specialist + "\n");
-        User user = new User("Alexander", "Bell",
-                LocalDateTime.of(2021, 1, 14, 5, 45), employeeDepartment, "abc",
-                "123");
-        writer.write(user + "\n");
-        String newInitial = user.modifyInitial("Alexander", "Dell");
-        writer.write(newInitial + "\n");
-        Foreman foreman = new Foreman("Ali", "Kill",
-                LocalDateTime.of(2001, 4, 15, 6, 45), employeeDepartment, "123",
-                "456");
-        writer.write(foreman + "\n");
-        HashMap<Brigade, Commission> map = foreman.getCommissions();
-        writer.write(map.toString() + "\n");
-        foreman.compareTo(user);
-        foreman.compareTo(specialist);
-        writer.write(Employee.employees + "\n");
-        Brigade brigade = new Brigade("FirstOne", foreman);
-        Foreman foreman2 = new Foreman("Alex", "Kill",
-                LocalDateTime.of(2001, 4, 15, 6, 45), employeeDepartment, "abc",
-                "qwerty");
-        brigade.addEmployee(foreman2);
-        brigade.addEmployee(Employee.employees);
-        writer.write(brigade + "\n");
-        Commission commission = new Commission(true);
-        writer.write(commission + "\n");
-        Commission commission2 = new Commission(true, brigade);
-        writer.write(commission2 + "\n");
-        HashSet<Job> hash = new HashSet<>();
-        Job job = new Job(TypeOfJob.GENERAL, 123, "Some job");
-        job.start();
-        writer.write(job + "\n");
-        Commission commission3 = new Commission(true, hash);
-        writer.write(commission3 + "\n");
-        Commission commission4 = new Commission(true, hash, brigade);
-        writer.write(commission4 + "\n");
-        commission2.addJob(new Job(TypeOfJob.DISASSEMBLY, 24, "The other job"));
-        commission3.addJob(hash);
-        commission.addJob(commission.jobs);
-        commission2.addJob(commission2.jobs);
-        commission3.addJob(commission3.jobs);
-        commission4.addJob(commission4.jobs);
-        Commission.addCommission(commission);
-        Commission.addCommission(commission2);
-        Commission.addCommission(commission3);
-        Commission.addCommission(commission4);
-        writer.write(commissions.toString() + "\n");
-        writer.write(jobs.toString() + "\n");
-        commission.addBrigade(brigade);
-        commission2.addBrigade(brigade);
-        commission3.addBrigade(brigade);
-        commission4.addBrigade(brigade);
-        commission.run();
-        commission2.run();
-        commission3.run();
-        commission4.run();
-        Job.addJob(job);
-        boolean isDone = job.isDone();
-        writer.write(isDone ? "1" : "0" + "\n");
+        EmployeeDepartment employeeDepartment1 = EmployeeDepartment.createDepartment("Engineer Department");
+        EmployeeDepartment employeeDepartment2 = EmployeeDepartment.createDepartment("Law Department");
+        EmployeeDepartment employeeDepartment3 = EmployeeDepartment.createDepartment("Engineer Department");
+        Specialist specialist1 = new Specialist("Adam", "Smith", LocalDateTime.of(2013, 4,
+                14, 4, 15), employeeDepartment1, "Engineer");
+        User user1 = new User("Alexander", "Bell", LocalDateTime.of(2020, 1, 14,
+                5, 45), employeeDepartment1, "1234", "Abc%");
+        HashSet<Job> jobs = createJobs(employeeDepartment2, employeeDepartment3, employeeDepartment1);
+        Job job1 = new Job(TypeOfJob.GENERAL, 500, "Best designer");
+        jobs.add(job1);
+        Job job2 = new Job(TypeOfJob.ASSEMBLY, 500, "Best manager");
+        jobs.add(job2);
+        Job job3 = new Job(TypeOfJob.DISASSEMBLY, 450, "Best engineer");
+        jobs.add(job3);
+        Job job4 = new Job(TypeOfJob.EXCHANGE, 350, "Best worker, all fields");
+        jobs.add(job4);
         writer.close();
-
         FileReader fileReader = new FileReader("history.txt");
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         System.out.println(bufferedReader.lines());
         fileReader.close();
         bufferedReader.close();
+    }
+
+    private static HashSet<Job> createJobs(EmployeeDepartment employeeDepartment2, EmployeeDepartment
+            employeeDepartment3, EmployeeDepartment employeeDepartment1) {
+        Foreman foreman1 = new Foreman("Alexander", "Graham", LocalDateTime.of(1998, 11,
+                5, 5, 30), employeeDepartment2, "93875", "Qwerty*");
+        Specialist specialist2 = new Specialist("Jake", "Smith", LocalDateTime.of(2015, 3,
+                14, 4, 15), employeeDepartment2, "Lawyer");
+        User user2 = new User("Kate", "Black", LocalDateTime.of(2005, 11, 14,
+                5, 45), employeeDepartment3, "34665", "&Abc%");
+        Foreman foreman2 = new Foreman("Adam", "Graham", LocalDateTime.of(1989, 5,
+                5, 5, 5), employeeDepartment3, "9we38495", "Quad39ab");
+        Specialist specialist3 = new Specialist("Alex", "White", LocalDateTime.of(2013, 4,
+                14, 4, 15), employeeDepartment3, "Manager");
+        User user3 = new User("Elise", "Bell", LocalDateTime.of(1980, 1, 4,
+                4, 44), employeeDepartment3, "1234", "A%*bc%");
+        HashSet<Job> jobs = getJobs(employeeDepartment1, foreman1, foreman2);
+        return jobs;
+    }
+
+    private static HashSet<Job> getJobs(EmployeeDepartment employeeDepartment1, Foreman foreman1, Foreman foreman2) {
+        Foreman foreman3 = new Foreman("Andy", "Graham", LocalDateTime.of(1998, 11,
+                5, 5, 30), employeeDepartment1, "93875", "Qwerty*");
+        Brigade brigade1 = new Brigade("Designers", foreman1);
+        Brigade brigade2 = new Brigade("Managers", foreman2);
+        Brigade brigade3 = new Brigade("Engineers", foreman3);
+        HashSet<Job> jobs = new HashSet<>();
+        Commission commission1 = new Commission(true);
+        Commission commission2 = new Commission(false);
+        Commission commission3 = new Commission(true, brigade1);
+        Commission commission4 = new Commission(false, brigade2);
+        Commission commission5 = new Commission(true, jobs);
+        Commission commission6 = new Commission(true, jobs, brigade3);
+        Commission commission7 = new Commission(false, jobs, brigade1);
+        return jobs;
     }
 }

@@ -1,20 +1,20 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class EmployeeDepartment {
-    private final int amountED = Main.amountED;
-    private String name;
-    public final ArrayList<Employee> employees = new ArrayList<>();
+    private final String name;
+    private ArrayList<Employee> employees = new ArrayList<>();
+    private static HashSet<String> names = new HashSet<>();
+    private static int counter = 0;
+    private final int employeeDepartmentID;
 
-    public EmployeeDepartment(String name) {
-        try {
-            if (Main.occupiedNames.contains(name)) {
-                throw new NotUniqueNameException("This name isn't unique");
-            }
-            this.name = name;
-            Main.occupiedNames.add(name);
-        } catch (NotUniqueNameException e) {
-            e.getStackTrace();
+    private EmployeeDepartment(String name) throws NotUniqueNameException {
+        if (names.contains(name)) {
+            throw new NotUniqueNameException("Name: " + name + " isn't unique");
         }
+        this.name = name;
+        names.add(name);
+        this.employeeDepartmentID = ++counter;
     }
 
     public String getName() {
@@ -25,16 +25,11 @@ public class EmployeeDepartment {
         return this.employees;
     }
 
-    public int getAmountED() {
-        return this.amountED;
-    }
-
-    public EmployeeDepartment createDepartment(EmployeeDepartment department) {
-        Main.amountED++;
-        return department;
+    public static EmployeeDepartment createDepartment(String name) throws NotUniqueNameException {
+        return new EmployeeDepartment(name);
     }
 
     public String toString() {
-        return this.getClass() + "( " + this.getAmountED() + " " + this.getName() + this.getEmployees() + ")";
+        return this.getClass().getName() + "( " + this.getName() + this.getEmployees() + ")";
     }
 }

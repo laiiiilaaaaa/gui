@@ -8,13 +8,16 @@ enum TypeOfJob {
 }
 
 public class Job extends Thread {
+    private static int counter = 0;
+    private final int jobID;
     private final TypeOfJob typeOfJob;
     private int timeOfWork;
     private boolean isDone = false;
     private final String description;
-    HashSet<Job> jobs = new HashSet<>();
+    private static HashSet<Job> jobs = new HashSet<>();
 
     public Job(TypeOfJob typeOfJob, int timeOfWork, String description) {
+        this.jobID = ++counter;
         this.typeOfJob = typeOfJob;
         this.timeOfWork = timeOfWork;
         this.description = description;
@@ -48,12 +51,11 @@ public class Job extends Thread {
     }
 
     public static void addJob(Job job) {
-        Main.jobs.put(Main.amountJ, job);
-        Main.amountJ++;
+        jobs.add(job);
     }
 
     public String toString() {
-        return this.getClass() + "( " + this.getTypeOfJob() + " " + this.getTimeOfWork() + " " + this.getDescription()
-                + this.jobs + " )";
+        return this.getClass().getName() + "( " + this.getTypeOfJob() + " " + this.getTimeOfWork() + " "
+                + this.getDescription() + jobs + " )";
     }
 }

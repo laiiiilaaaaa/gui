@@ -1,21 +1,21 @@
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public abstract class Employee {
-    private final int amountE = Main.amountE;
-    public static ArrayList<Employee> employees = new ArrayList<>();
-    private String name;
-    private String surname;
+public abstract class Employee implements Comparable<Employee> {
+    private static int counter = 0;
+    private final int employeeID;
+    private static ArrayList<Employee> employees = new ArrayList<>();
+    protected String name;
+    protected String surname;
     private final LocalDateTime dateOfBirth;
     private final EmployeeDepartment department;
 
     public Employee(String name, String surname, LocalDateTime dateOfBirth, EmployeeDepartment department) {
+        this.employeeID = ++counter;
         this.name = name;
         this.surname = surname;
         this.dateOfBirth = dateOfBirth;
         this.department = department;
-        Main.amountE++;
     }
 
     public String getName() {
@@ -34,10 +34,6 @@ public abstract class Employee {
         return this.department;
     }
 
-    public int getAmountE() {
-        return this.amountE;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -46,22 +42,26 @@ public abstract class Employee {
         this.surname = surname;
     }
 
-    interface Comparable {
-        int compareTo(Employee employee);
+    public int compareTo(Employee employee) {
+        return (this.name.length() == employee.name.length() && this.name.equals(employee.name)
+                && this.dateOfBirth.equals(employee.dateOfBirth)) ? 0 : 1;
     }
 
-    public int compareTo(Employee employee) {
-        return this.getName().compareTo(employee.getName()) != 0 ? this.getName().compareTo(employee.getName()) :
-                this.getName().compareTo(employee.getDateOfBirth().toString());
+    public void changeName(String newName) {
+        this.name = newName;
+    }
+
+    public void changeSurname(String newSurname) {
+        this.surname = newSurname;
     }
 
     public String toString() {
-        return this.getClass() + "( " + this.getAmountE() + " " + employees + " " + this.getName() + " "
+        return this.getClass() + "( " + employees + " " + this.getName() + " "
                 + this.getSurname() + " " + this.getDateOfBirth() + " " + this.getDepartment() + ")";
     }
 }
 
-class Specialist extends Employee implements Comparable {
+class Specialist extends Employee {
     private final String specialisation;
 
     public Specialist(String name, String surname, LocalDateTime dateOfBirth, EmployeeDepartment department,
@@ -75,25 +75,15 @@ class Specialist extends Employee implements Comparable {
     }
 
     @Override
-    public int compareTo(Employee employee) {
-        return super.compareTo(employee);
-    }
-
-    @Override
     public String toString() {
         return super.toString() + this.getSpecialisation();
     }
-
-    @Override
-    public int compareTo(Object o) {
-        return 0;
-    }
 }
 
-class User extends Employee implements Comparable {
+class User extends Employee {
     private final String login;
     private final String password;
-    private String initial = String.valueOf(super.getName().charAt(0) + super.getSurname().charAt(0));
+    private String initial = String.valueOf(this.name.charAt(0) + this.surname.charAt(0));
 
     public User(String name, String surname, LocalDateTime dateOfBirth, EmployeeDepartment department, String login,
                 String password) {
@@ -110,50 +100,55 @@ class User extends Employee implements Comparable {
         return this.password;
     }
 
-    @Override
-    public int compareTo(Employee employee) {
-        return super.compareTo(employee);
-    }
-
     public String getInitial() {
         return this.initial;
     }
 
-    public String modifyInitial(String name, String surname) {
-        if (!super.getName().equals(name) || !super.getSurname().equals(surname)) {
-            this.initial = String.valueOf(super.getName().charAt(0) + super.getSurname().charAt(0));
-            super.setName(name);
-            super.setSurname(surname);
-        }
-        return this.initial;
+    private void setInitial() {
+        this.initial = String.valueOf(this.name.charAt(0) + this.surname.charAt(0));
+    }
+
+    @Override
+    public void changeName(String newName) {
+        super.changeName(newName);
+        setInitial();
+    }
+
+    @Override
+    public void changeSurname(String newSurname) {
+        super.changeSurname(newSurname);
+        setInitial();
     }
 
     @Override
     public String toString() {
         return super.toString() + " " + this.getLogin() + " " + this.getPassword() + " " + this.getInitial();
     }
-
-    @Override
-    public int compareTo(Object o) {
-        return 0;
-    }
 }
 
-class Foreman extends User implements Comparable {
-    private final HashMap<Brigade, Commission> commissions = new HashMap<>();
+class Foreman extends User {
+    private ArrayList<Brigade> brigades = new ArrayList<>();
+    private ArrayList<Commission> commissions = new ArrayList<>();
 
     public Foreman(String name, String surname, LocalDateTime dateOfBirth, EmployeeDepartment department, String login,
                    String password) {
         super(name, surname, dateOfBirth, department, login, password);
     }
 
-    @Override
-    public int compareTo(Employee employee) {
-        return super.compareTo(employee);
+    public ArrayList<Commission> getCommissions() {
+        return this.commissions;
     }
 
-    public HashMap<Brigade, Commission> getCommissions() {
-        return this.commissions;
+    public ArrayList<Brigade> getBrigades() {
+        return this.brigades;
+    }
+
+    public void addCommission(Commission commission) {
+        this.commissions.add(commission);
+    }
+
+    public void addBrigade(Brigade brigade) {
+        this.brigades.add(brigade);
     }
 
     @Override

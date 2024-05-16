@@ -12,37 +12,40 @@ enum State {
     state, ENDED
 }
 
-public class Commission {
-    public HashSet<Job> jobs = new HashSet<>();
+public class Commission implements Runnable {
+    private static int counter = 0;
+    private final int commissionId;
+    private HashSet<Job> jobs = new HashSet<>();
     private Brigade brigade;
     private final Type type;
     private LocalDateTime dateOfCreation;
     private LocalDateTime dateOfStart;
     private LocalDateTime dateOfEnd;
     public State state;
+    private static HashSet<Commission> commissions = new HashSet<>();
 
     public Commission(boolean isPlanned) {
         this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
+        commissionId = ++counter;
     }
 
     public Commission(boolean isPlanned, Brigade brigade) {
         this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
         this.brigade = brigade;
+        commissionId = ++counter;
     }
 
     public Commission(boolean isPlanned, HashSet<Job> jobs) {
         this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
         this.jobs = jobs;
+        commissionId = ++counter;
     }
 
     public Commission(boolean isPlanned, HashSet<Job> jobs, Brigade brigade) {
         this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
         this.jobs = jobs;
         this.brigade = brigade;
-    }
-
-    interface Runnable {
-        void run();
+        commissionId = ++counter;
     }
 
     public Brigade getBrigade() {
@@ -79,34 +82,30 @@ public class Commission {
     }
 
     public void run() {
-        try {
-            for (Employee employee : this.brigade.employees) {
-                int amount = 0;
-                for (Employee e : employee.getDepartment().getEmployees()) {
-                    if (e == employee) {
-                        amount++;
-                    }
-                }
-                if (amount > 1) {
-                    throw new IllegalStateException();
+        for (Employee employee : this.brigade.getEmployees()) {
+            int amount = 0;
+            for (Employee e : employee.getDepartment().getEmployees()) {
+                if (e == employee) {
+                    amount++;
                 }
             }
-            if (this.addBrigade(this.brigade) && !this.jobs.isEmpty()) {
-                this.dateOfCreation = LocalDateTime.now();
-                this.state = State.CREATED;
-                this.dateOfStart = LocalDateTime.now();
-                this.state = State.STARTED;
-                for (Job job : this.jobs) {
-                    job.start();
-                    if (this.getState()) {
-                        System.out.println(job.getState());
-                    }
-                }
-                this.dateOfEnd = LocalDateTime.now();
-                this.state = State.ENDED;
+            if (amount > 1) {
+                throw new IllegalStateException();
             }
-        } catch (IllegalStateException e) {
-            e.getStackTrace();
+        }
+        if (this.addBrigade(this.brigade) && !this.jobs.isEmpty()) {
+            this.dateOfCreation = LocalDateTime.now();
+            this.state = State.CREATED;
+            this.dateOfStart = LocalDateTime.now();
+            this.state = State.STARTED;
+            for (Job job : this.jobs) {
+                job.start();
+                if (this.getState()) {
+                    System.out.println(job.getState());
+                }
+            }
+            this.dateOfEnd = LocalDateTime.now();
+            this.state = State.ENDED;
         }
     }
 
@@ -115,12 +114,12 @@ public class Commission {
     }
 
     public static void addCommission(Commission commission) {
-        Main.commissions.put(Main.amountC, commission);
-        Main.amountC++;
+        commissions.add(commission);
     }
 
     public String toString() {
-        return this.getClass() + "( " + this.jobs + " " + this.getBrigade() + " " + this.getType() + " " +
-                this.getDateOfCreation() + " " + this.getDateOfStart() + " " + this.getDateOfEnd() + " " + this.getState() + " )";
+        return this.getClass().getName() + "( " + this.jobs + " " + this.getBrigade() + " " + this.getType() + " " +
+                this.getDateOfCreation() + " " + this.getDateOfStart() + " " + this.getDateOfEnd() + " "
+                + this.getState() + " )";
     }
 }
