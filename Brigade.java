@@ -1,11 +1,12 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Brigade {
     private static int counter = 0;
     private final int brigadeID;
     private final String name;
     private final Foreman foreman;
-    private static ArrayList<Employee> employees = new ArrayList<>();
+    private final HashSet<Employee> employees = new HashSet<>();
 
     public Brigade(String name, Foreman foreman) {
         this.name = name;
@@ -21,23 +22,20 @@ public class Brigade {
         return this.foreman;
     }
 
-    public ArrayList<Employee> getEmployees() {
+    public HashSet<Employee> getEmployees() {
         return employees;
     }
 
     public void addEmployee(Employee employee) {
-        if (employee.getClass() == User.class) {
-            throw new IllegalArgumentException("Cannot add employee to user");
+        if (employee instanceof User) {
+            throw new IllegalArgumentException("Cannot add user to employee list");
         }
         employees.add(employee);
     }
 
     public void addEmployee(ArrayList<Employee> employees) {
         for (Employee employee : employees) {
-            if (employee.getClass() == User.class) {
-                throw new IllegalArgumentException("Cannot add employee to user");
-            }
-            employees.add(employee);
+            addEmployee(employee);
         }
     }
 

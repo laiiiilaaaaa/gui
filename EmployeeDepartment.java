@@ -3,8 +3,8 @@ import java.util.HashSet;
 
 public class EmployeeDepartment {
     private final String name;
-    private ArrayList<Employee> employees = new ArrayList<>();
-    private static HashSet<String> names = new HashSet<>();
+    private final ArrayList<Employee> employees = new ArrayList<>();
+    private static final HashSet<String> names = new HashSet<>();
     private static int counter = 0;
     private final int employeeDepartmentID;
 

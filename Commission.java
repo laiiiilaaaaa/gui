@@ -1,4 +1,6 @@
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 enum Type {
@@ -6,46 +8,39 @@ enum Type {
     NOT_PLANNED
 }
 
-enum State {
-    CREATED,
-    STARTED,
-    state, ENDED
-}
-
 public class Commission implements Runnable {
     private static int counter = 0;
     private final int commissionId;
-    private HashSet<Job> jobs = new HashSet<>();
+    private ArrayList<Job> jobs = new ArrayList<>();
     private Brigade brigade;
     private final Type type;
-    private LocalDateTime dateOfCreation;
-    private LocalDateTime dateOfStart;
-    private LocalDateTime dateOfEnd;
-    public State state;
-    private static HashSet<Commission> commissions = new HashSet<>();
+    private final LocalDateTime dateOfCreation;
+    private LocalDateTime dateOfStart = null;
+    private LocalDateTime dateOfEnd = null;
+    private State state;
+    private static final HashSet<Commission> currentCommissions = new HashSet<>();
+    private static final HashMap<Integer, Commission> commissions = new HashMap<>();
 
     public Commission(boolean isPlanned) {
-        this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
-        commissionId = ++counter;
+        this(isPlanned, null, null);
     }
 
     public Commission(boolean isPlanned, Brigade brigade) {
-        this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
-        this.brigade = brigade;
-        commissionId = ++counter;
+        this(isPlanned, null, brigade);
     }
 
-    public Commission(boolean isPlanned, HashSet<Job> jobs) {
-        this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
-        this.jobs = jobs;
-        commissionId = ++counter;
+    public Commission(boolean isPlanned, ArrayList<Job> jobs) {
+        this(isPlanned, jobs, null);
     }
 
-    public Commission(boolean isPlanned, HashSet<Job> jobs, Brigade brigade) {
+    public Commission(boolean isPlanned, ArrayList<Job> jobs, Brigade brigade) {
         this.type = isPlanned ? Type.PLANNED : Type.NOT_PLANNED;
         this.jobs = jobs;
-        this.brigade = brigade;
-        commissionId = ++counter;
+        this.commissionId = ++counter;
+        this.state = State.CREATED;
+        this.dateOfCreation = LocalDateTime.now();
+        this.addBrigade(brigade);
+        commissions.put(this.commissionId, this);
     }
 
     public Brigade getBrigade() {
@@ -77,31 +72,40 @@ public class Commission implements Runnable {
     }
 
     public boolean addBrigade(Brigade brigade) {
-        this.brigade = brigade;
-        return this.brigade != null;
+        if (this.brigade == null) {
+            this.brigade = brigade;
+            this.brigade.getForeman().addCommission(this);
+            return true;
+        }
+        return false;
+    }
+
+    public static Commission getCommission(int commissionId) {
+        if (!commissions.containsKey(commissionId)) {
+            throw new IllegalArgumentException("There's no commission with id " + commissionId);
+        }
+        return commissions.get(commissionId);
+    }
+
+    public boolean areEmployeesFree() {
+        for (Employee employee : brigade.getEmployees()) {
+            for (Commission commission : currentCommissions) {
+                if (commission.getBrigade().getEmployees().contains(employee)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void run() {
-        for (Employee employee : this.brigade.getEmployees()) {
-            int amount = 0;
-            for (Employee e : employee.getDepartment().getEmployees()) {
-                if (e == employee) {
-                    amount++;
-                }
-            }
-            if (amount > 1) {
-                throw new IllegalStateException();
-            }
-        }
-        if (this.addBrigade(this.brigade) && !this.jobs.isEmpty()) {
-            this.dateOfCreation = LocalDateTime.now();
-            this.state = State.CREATED;
+        if (this.brigade != null && !this.jobs.isEmpty() && areEmployeesFree()) {
+            currentCommissions.add(this);
             this.dateOfStart = LocalDateTime.now();
             this.state = State.STARTED;
             for (Job job : this.jobs) {
-                job.start();
-                if (this.getState()) {
-                    System.out.println(job.getState());
+                if (job.couldBeDone()) {
+                    job.run();
                 }
             }
             this.dateOfEnd = LocalDateTime.now();
@@ -109,12 +113,12 @@ public class Commission implements Runnable {
         }
     }
 
-    public boolean getState() {
-        return true;
+    public State getState() {
+        return this.state;
     }
 
     public static void addCommission(Commission commission) {
-        commissions.add(commission);
+        currentCommissions.add(commission);
     }
 
     public String toString() {
